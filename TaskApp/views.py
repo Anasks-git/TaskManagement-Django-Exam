@@ -53,8 +53,11 @@ class TaskRetrieveUpdateDeleteView(APIView):
 
     def get(self,request,id):
         form_data = get_object_or_404(TaskDB,id = id)
-        serializer_instance = TaskSerializers(form_data)
-        return Response(serializer_instance.data)
+        if form_data.user == request.user:
+            serializer_instance = TaskSerializers(form_data)
+            return Response(serializer_instance.data)
+        else:
+            return Response({"Message":"User id not Valid"})
 
     def put(self,request,id):
         form_data = request.data
@@ -66,8 +69,13 @@ class TaskRetrieveUpdateDeleteView(APIView):
                 return Response(data = {"Message":"Data Added Successfully"})
             else:
                 return Response(data = serializer_instance.errors)
+        else:
+            return Response({"Message":"User id not Valid"})
 
     def delete(self,request,id):
         data_obj = get_object_or_404(TaskDB,id=id)
-        data_obj.delete()
-        return Response({"Message":"Deletion Successfull"})
+        if data_obj.user == request.user:
+            data_obj.delete()
+            return Response({"Message":"Deletion Successfull"})
+        else:
+            return Response({"Message":"User id not Valid"})
